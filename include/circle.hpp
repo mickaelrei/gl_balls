@@ -34,7 +34,7 @@ public:
     unsigned int VBO, VAO, EBO;
 
     // constructor
-    Circle(const float _centerX, const float _centerY, const float _radius, float aspectRatio)
+    Circle(const float _centerX, const float _centerY, const float _radius)
         : radius{_radius},
           centerX{_centerX},
           centerY{_centerY}

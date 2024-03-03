@@ -1,5 +1,6 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include <iostream>
 #include <string>
@@ -66,12 +67,12 @@ int main()
 
     // Shader and circle
     Shader shader{"./shaders/vertex_shader.glsl", "./shaders/fragment_shader.glsl"};
-    // Circle circle{-0.5f, 0.5f, 0.5f, aspectRatio};
+    // Circle circle{-0.5f, 0.5f, 0.5f};
     Circle circles[4] = {
-        Circle{-0.5f, -0.5f, 0.5f, aspectRatio},
-        Circle{0.35f, 0.2f, 0.15f, aspectRatio},
-        Circle{-0.6f, -0.3f, 0.25f, aspectRatio},
-        Circle{0.8f, 0.8f, 0.05f, aspectRatio},
+        Circle{-0.5f, -0.5f, 0.5f},
+        Circle{0.35f, 0.2f, 0.15f},
+        Circle{-0.6f, 0.5f, 0.25f},
+        Circle{0.8f, 0.8f, 0.05f},
     };
 
     // Set polygon mode
@@ -86,6 +87,11 @@ int main()
     float before = glfwGetTime();
     while (!glfwWindowShouldClose(window))
     {
+        // Get dt
+        float now = glfwGetTime();
+        float dt = now - before;
+        before = now;
+
         // Input
         // -----
         processInput(window);
@@ -93,10 +99,10 @@ int main()
         // Update aspect ratio
         aspectRatio = getAspectRatio();
 
-        // Get dt
-        float now = glfwGetTime();
-        float dt = now - before;
-        before = now;
+        // Set projection matrix
+        glm::mat4 projection = glm::mat4(1.0f);
+        projection = glm::ortho(-aspectRatio, aspectRatio, -1.0f, 1.0f, -1.0f, 1.0f);
+        shader.setMat4("projection", projection);
 
         // Update title
         std::stringstream sstr;
@@ -104,14 +110,14 @@ int main()
         glfwSetWindowTitle(window, sstr.str().c_str());
 
         // Move balls in circular motion
-        for (int i = 0; i < 4; ++i)
-        {
-            float div = (float)(i + 1);
-            Circle &circle = circles[i];
-            circle.centerX = -0.5f + 0.25f * div + std::cos(now / div) / aspectRatio * 0.5f;
-            circle.centerY = std::sin(now / div) * 0.5f;
-            circle.radius = std::abs(std::sin(now / div * .4f)) * 0.25f + 0.15f / div;
-        }
+        // for (int i = 0; i < 4; ++i)
+        // {
+        //     float div = (float)(i + 1);
+        //     Circle &circle = circles[i];
+        //     circle.centerX = -0.5f + 0.25f * div + std::cos(now / div) / aspectRatio * 0.5f;
+        //     circle.centerY = std::sin(now / div) * 0.5f;
+        //     circle.radius = std::abs(std::sin(now / div * .4f)) * 0.25f + 0.15f / div;
+        // }
 
         // Rendering commands
         // ------------------
@@ -123,9 +129,13 @@ int main()
         for (int i = 0; i < 4; ++i)
         {
             Circle circle = circles[i];
-            shader.setFloat2("center", circle.centerX, circle.centerY);
+
+            // Set model matrix
+            glm::mat4 model = glm::mat4(1.0f);
+            model = glm::translate(model, glm::vec3(circle.centerX, circle.centerY, 0.0f));
+            model = glm::scale(model, glm::vec3(circle.radius, circle.radius, 1.0f));
+            shader.setMat4("model", model);
             shader.setFloat("radius", circle.radius);
-            shader.setFloat("aspectRatio", aspectRatio);
             circle.draw();
         }
 
