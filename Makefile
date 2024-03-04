@@ -1,22 +1,33 @@
-CFLAGS = -lglfw -lGL -lstdc++ -Wall
+CFLAGS := -lglfw -lGL -lstdc++ -Wall -fsanitize=address,undefined
 
-INCLUDE_GLAD = ./glad/include
-INCLUDE = ./include
+INCLUDE := ./include
+SRC := ./src
+BIN := ./bin
 
-SOURCE = main.cpp \
-		 ./glad/src/glad.c
+TARGET = $(BIN)/main
 
-OBJ_DIR = obj
-TARGET_DIR = bin
+all: $(TARGET)
 
-TARGET = main
+$(TARGET): $(BIN)/application.o $(BIN)/circle.o $(BIN)/shader.o $(BIN)/glad.o $(BIN)/verlet_object.o $(BIN)/solver.o ./main.cpp
+	$(CXX) -I. -I./glad/include/glad $(BIN)/application.o $(BIN)/circle.o $(BIN)/shader.o $(BIN)/glad.o $(BIN)/verlet_object.o $(BIN)/solver.o ./main.cpp -o $(TARGET) $(CFLAGS)
 
-all:
-	if [ ! -d $(TARGET_DIR) ]; then mkdir $(TARGET_DIR); fi
-	$(CXX) -I$(INCLUDE) -I$(INCLUDE_GLAD) $(SOURCE) -o $(TARGET_DIR)/$(TARGET) $(CFLAGS)
+$(BIN)/application.o: $(INCLUDE)/application.hpp $(SRC)/application.cpp
+	$(CXX) -I. -c $(SRC)/application.cpp -o $(BIN)/application.o $(CFLAGS)
 
-run:
-	./$(TARGET_DIR)/$(TARGET)
+$(BIN)/circle.o: $(INCLUDE)/circle.hpp $(SRC)/circle.cpp
+	$(CXX) -I. -c $(SRC)/circle.cpp -o $(BIN)/circle.o $(CFLAGS)
+
+$(BIN)/shader.o: $(INCLUDE)/shader.hpp $(SRC)/shader.cpp
+	$(CXX) -I. -c $(SRC)/shader.cpp -o $(BIN)/shader.o $(CFLAGS)
+
+$(BIN)/glad.o: $(INCLUDE)/glad.h $(INCLUDE)/khrplatform.h $(SRC)/glad.c
+	$(CXX) -I. -c $(SRC)/glad.c -o $(BIN)/glad.o $(CFLAGS)
+
+$(BIN)/verlet_object.o: $(SRC)/verlet_object.cpp $(INCLUDE)/verlet_object.hpp
+	$(CXX) -I. -c $(SRC)/verlet_object.cpp -o $(BIN)/verlet_object.o $(CFLAGS)
+
+$(BIN)/solver.o: $(SRC)/solver.cpp $(INCLUDE)/solver.hpp
+	$(CXX) -I. -c $(SRC)/solver.cpp -o $(BIN)/solver.o $(CFLAGS)
 
 clean:
-	rm $(TARGET_DIR)/*
+	rm $(BIN)/*

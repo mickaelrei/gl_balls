@@ -24,5 +24,7 @@ void main()
 	float alpha = smoothstep(0.5f, 0.5f - ALPHA_OFFSET * 0.5f / max(radius, 0.05f), dist);
 
 	// Final color
-	gl_FragColor = vec4(uv.xy, 0.0f, alpha);
+	vec3 color = vec3(uv.xy, 0.0f);
+	color = vec3(uv.xy, 1.0);
+	gl_FragColor = vec4(color, alpha);
 }
