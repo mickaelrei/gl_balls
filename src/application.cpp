@@ -102,13 +102,13 @@ void Application::Start()
         {
             last = now;
             // Create object
-            VerletObject object{glm::vec2(0.0f, 0.5f), shader, 0.025f};
+            VerletObject object{glm::vec2(0.0f, 0.5f), shader, (float)((size * 5) % 80) / 80.0f * .03f + .05f};
 
             // Add velocity
             float angle = (float)size / 7.f;
             float x = std::cos(angle);
             float y = -std::abs(std::sin(angle));
-            object.center += glm::vec2{x, y} * .001f;
+            object.center += glm::vec2{x, y} * .005f;
 
             // Add to vector
             solver.AddObject(object);
